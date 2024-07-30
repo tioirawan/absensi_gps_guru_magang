@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:latlong2/latlong.dart';
 
 class AttendancePage extends StatefulWidget {
   const AttendancePage({super.key});
@@ -12,6 +14,8 @@ class AttendancePage extends StatefulWidget {
 }
 
 class _AttendancePageState extends State<AttendancePage> {
+  final MapController mapController = MapController();
+
   int _selectedPekerjaan = 2;
 
   bool _isLaptop = false;
@@ -215,6 +219,11 @@ class _AttendancePageState extends State<AttendancePage> {
                 onPressed: () async {
                   final Position position = await _determinePosition();
 
+                  mapController.move(
+                    LatLng(position.latitude, position.longitude),
+                    16,
+                  );
+
                   print("Fake GPS: ${position.isMocked}");
                   setState(() {
                     _latitude = position.latitude;
@@ -225,6 +234,32 @@ class _AttendancePageState extends State<AttendancePage> {
                   minimumSize: const Size.fromHeight(56),
                 ),
                 child: const Text("Update Lokasi"),
+              ),
+              SizedBox(
+                height: 300,
+                child: FlutterMap(
+                  mapController: mapController,
+                  children: [
+                    // open street map
+                    TileLayer(
+                      urlTemplate:
+                          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                      subdomains: const ['a', 'b', 'c'],
+                      minNativeZoom: 2,
+                      maxNativeZoom: 18,
+                    ),
+                    MarkerLayer(markers: [
+                      if (_latitude != null && _longitude != null)
+                        Marker(
+                          point: LatLng(_latitude!, _longitude!),
+                          child: const Icon(
+                            Icons.location_on,
+                            color: Colors.red,
+                          ),
+                        ),
+                    ]),
+                  ],
+                ),
               ),
             ],
           ),

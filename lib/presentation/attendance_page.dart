@@ -235,16 +235,23 @@ class _AttendancePageState extends State<AttendancePage> {
                 ),
                 child: const Text("Update Lokasi"),
               ),
+              const SizedBox(height: 24),
               SizedBox(
                 height: 300,
                 child: FlutterMap(
                   mapController: mapController,
                   children: [
-                    // open street map
+                    // TileLayer(
+                    //   urlTemplate:
+                    //       "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    //   subdomains: const ['a', 'b', 'c'],
+                    //   minNativeZoom: 2,
+                    //   maxNativeZoom: 18,
+                    // ),
                     TileLayer(
                       urlTemplate:
-                          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                      subdomains: const ['a', 'b', 'c'],
+                          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                      subdomains: const ['server', 'services'],
                       minNativeZoom: 2,
                       maxNativeZoom: 18,
                     ),

@@ -41,6 +41,8 @@ dependencies:
   latlong2: ^0.9.1
   google_fonts: ^6.2.1
   font_awesome_flutter: ^10.7.0
+  flutter_animate: ^4.5.0
+  dio: ^5.5.0+1
 
 dev_dependencies:
   flutter_test:

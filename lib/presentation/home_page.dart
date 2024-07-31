@@ -1,4 +1,4 @@
-import 'package:absensi_gps/presentation/widgets/attendance_item.dart';
+import 'package:absensi_gps/dio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -102,14 +102,34 @@ class HomePage1 extends StatelessWidget {
             ],
           ),
         ),
+        // Expanded(
+        //   child: ListView.builder(
+        //     key: PageStorageKey(scrollKey),
+        //     padding: const EdgeInsets.all(16),
+        //     itemCount: 100,
+        //     itemBuilder: (context, index) {
+        //       return Padding(
+        //         padding: const EdgeInsets.only(bottom: 10.0),
+        //         child: AttendenceItem(title: "Item $index"),
+        //       );
+        //     },
+        //   ),
+        // ),
         Expanded(
-          child: ListView.builder(
-            key: PageStorageKey(scrollKey),
-            padding: const EdgeInsets.all(16),
-            itemCount: 100,
-            itemBuilder: (context, index) {
-              return AttendenceItem(title: "Item $index");
-            },
+          child: Center(
+            child: FutureBuilder(
+              future: dio.get('/attendances'),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Text(snapshot.data.toString());
+                }
+                if (snapshot.hasError) {
+                  return Text(snapshot.error.toString());
+                }
+
+                return const CircularProgressIndicator();
+              },
+            ),
           ),
         ),
       ],

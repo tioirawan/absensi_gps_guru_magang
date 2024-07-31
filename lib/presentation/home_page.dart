@@ -138,6 +138,11 @@ class HomePage1 extends StatelessWidget {
                           title: attendance['work_description'],
                           imageUrl: attendance['image'],
                           description: attendance['work'],
+                          isLaptop: attendance['is_laptop'] == 1,
+                          isKomputer: attendance['is_komputer'] == 1,
+                          isHp: attendance['is_hp'] == 1,
+                          isLainya: attendance['is_lainya'] == 1,
+                          mood: attendance['mood'],
                         ),
                       );
                     },

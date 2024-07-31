@@ -1,11 +1,16 @@
+import 'package:absensi_gps/dio_service.dart';
 import 'package:flutter/material.dart';
 
 class AttendenceItem extends StatelessWidget {
   final String title;
+  final String imageUrl;
+  final String description;
 
   const AttendenceItem({
     super.key,
     required this.title,
+    required this.imageUrl,
+    required this.description,
   });
 
   @override
@@ -23,12 +28,21 @@ class AttendenceItem extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            Image.network(
+              headers: const {
+                'Authorization': 'Bearer $token',
+              },
+              "https://9000-idx-api-absensi-1722313474008.cluster-a3grjzek65cxex762e4mwrzl46.cloudworkstations.dev/storage/$imageUrl",
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
+            ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Half day application",
-                  style: TextStyle(
+                Text(
+                  description,
+                  style: const TextStyle(
                     color: Colors.grey,
                   ),
                 ),

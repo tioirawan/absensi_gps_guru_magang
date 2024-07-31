@@ -135,7 +135,10 @@ class HomePage1 extends StatelessWidget {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10.0),
                         child: AttendenceItem(
-                            title: attendance['work_description']),
+                          title: attendance['work_description'],
+                          imageUrl: attendance['image'],
+                          description: attendance['work'],
+                        ),
                       );
                     },
                   );

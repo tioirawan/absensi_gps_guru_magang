@@ -1,4 +1,5 @@
 import 'package:absensi_gps/dio_service.dart';
+import 'package:absensi_gps/presentation/widgets/attendance_item.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -121,7 +122,23 @@ class HomePage1 extends StatelessWidget {
               future: dio.get('/attendances'),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return Text(snapshot.data.toString());
+                  final response = snapshot.data?.data as Map<String, dynamic>;
+                  final attendances = response['data'] as List<dynamic>;
+
+                  return ListView.builder(
+                    key: PageStorageKey(scrollKey),
+                    padding: const EdgeInsets.all(16),
+                    itemCount: attendances.length,
+                    itemBuilder: (context, index) {
+                      final attendance = attendances[index];
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10.0),
+                        child: AttendenceItem(
+                            title: attendance['work_description']),
+                      );
+                    },
+                  );
                 }
                 if (snapshot.hasError) {
                   return Text(snapshot.error.toString());

@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:absensi_gps/dio_service.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -17,6 +19,12 @@ class _AttendancePageState extends State<AttendancePage> {
   final MapController mapController = MapController();
   final TextEditingController _deskripsiPekerjaanController =
       TextEditingController();
+
+  final List<String> _pekerjaan = [
+    "Mengajar",
+    "Penelitian",
+    "Pengabdian",
+  ];
 
   int _selectedPekerjaan = 2;
 
@@ -47,7 +55,35 @@ class _AttendancePageState extends State<AttendancePage> {
         isLocationSelected;
   }
 
-  void _submitForm() {}
+  void _submitForm() async {
+    try {
+      final request = dio.post(
+        '/attendances',
+        data: FormData.fromMap(
+          {
+            'work_description': _deskripsiPekerjaanController.text,
+            'work': _pekerjaan[_selectedPekerjaan],
+            'is_laptop': _isLaptop ? 1 : 0,
+            'is_komputer': _isKomputer ? 1 : 0,
+            'is_hp': _isHP ? 1 : 0,
+            'is_lainya': _isLainya ? 1 : 0,
+            'mood': _suasanaHati,
+            'image': MultipartFile.fromFileSync(image!.path),
+            'lat': _latitude,
+            'long': _longitude,
+          },
+        ),
+      );
+
+      final response = await request;
+
+      print(response.data);
+
+      Navigator.of(context).pop();
+    } on Exception catch (e) {
+      print(e);
+    }
+  }
 
   /// Determine the current position of the device.
   ///
@@ -114,19 +150,12 @@ class _AttendancePageState extends State<AttendancePage> {
                   labelText: 'Pekerjaan',
                 ),
                 value: _selectedPekerjaan,
-                items: const [
-                  DropdownMenuItem(
-                    value: 1,
-                    child: Text("Pekerjaan 1"),
-                  ),
-                  DropdownMenuItem(
-                    value: 2,
-                    child: Text("Pekerjaan 2"),
-                  ),
-                  DropdownMenuItem(
-                    value: 3,
-                    child: Text("Pekerjaan 3"),
-                  ),
+                items: [
+                  for (final (i, pekerjaan) in _pekerjaan.indexed)
+                    DropdownMenuItem(
+                      value: i,
+                      child: Text(pekerjaan),
+                    ),
                 ],
                 onChanged: (value) {
                   setState(() {

@@ -1,4 +1,5 @@
 import 'package:absensi_gps/dio_service.dart';
+import 'package:absensi_gps/presentation/attendance_page.dart';
 import 'package:absensi_gps/presentation/widgets/attendance_item.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -78,7 +79,14 @@ class HomePage1 extends StatelessWidget {
                     icon: const Icon(Icons.notifications),
                   ),
                   IconButton.filled(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AttendancePage(),
+                        ),
+                      );
+                    },
                     style: IconButton.styleFrom(
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),

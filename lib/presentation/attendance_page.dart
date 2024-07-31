@@ -15,6 +15,8 @@ class AttendancePage extends StatefulWidget {
 
 class _AttendancePageState extends State<AttendancePage> {
   final MapController mapController = MapController();
+  final TextEditingController _deskripsiPekerjaanController =
+      TextEditingController();
 
   int _selectedPekerjaan = 2;
 
@@ -29,6 +31,23 @@ class _AttendancePageState extends State<AttendancePage> {
 
   double? _latitude;
   double? _longitude;
+
+  bool _isLoading = false;
+
+  bool _isFormValid() {
+    final isDeskripsiPekerjaanValid =
+        _deskripsiPekerjaanController.text.isNotEmpty;
+    final isAlatKerjaSelected = _isLaptop || _isKomputer || _isHP || _isLainya;
+    final isImageSelected = image != null;
+    final isLocationSelected = _latitude != null && _longitude != null;
+
+    return isDeskripsiPekerjaanValid &&
+        isAlatKerjaSelected &&
+        isImageSelected &&
+        isLocationSelected;
+  }
+
+  void _submitForm() {}
 
   /// Determine the current position of the device.
   ///
@@ -84,6 +103,7 @@ class _AttendancePageState extends State<AttendancePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextFormField(
+                controller: _deskripsiPekerjaanController,
                 decoration: const InputDecoration(
                   labelText: 'Deskripsi Pekerjaan',
                 ),
@@ -217,7 +237,15 @@ class _AttendancePageState extends State<AttendancePage> {
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: () async {
+                  setState(() {
+                    _isLoading = true;
+                  });
+
                   final Position position = await _determinePosition();
+
+                  setState(() {
+                    _isLoading = false;
+                  });
 
                   mapController.move(
                     LatLng(position.latitude, position.longitude),
@@ -233,7 +261,11 @@ class _AttendancePageState extends State<AttendancePage> {
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(56),
                 ),
-                child: const Text("Update Lokasi"),
+                child: _isLoading
+                    ? const CircularProgressIndicator(
+                        color: Colors.white,
+                      )
+                    : const Text("Update Lokasi"),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -268,6 +300,15 @@ class _AttendancePageState extends State<AttendancePage> {
                   ],
                 ),
               ),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: _isFormValid() ? _submitForm : null,
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(56),
+                ),
+                child: const Text("Kirim"),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

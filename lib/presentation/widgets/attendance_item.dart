@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class AttendenceItem extends StatelessWidget {
   final String title;
-  final String imageUrl;
+  final String? imageUrl;
   final String description;
   final String mood;
 
@@ -51,15 +51,16 @@ class AttendenceItem extends StatelessWidget {
       child: IntrinsicHeight(
         child: Row(
           children: [
-            Image.network(
-              headers: const {
-                'Authorization': 'Bearer $token',
-              },
-              "https://9000-idx-api-absensi-1722313474008.cluster-a3grjzek65cxex762e4mwrzl46.cloudworkstations.dev/storage/$imageUrl",
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-            ),
+            if (imageUrl != null)
+              Image.network(
+                headers: const {
+                  'Authorization': 'Bearer $token',
+                },
+                "https://9000-idx-api-absensi-1722313474008.cluster-a3grjzek65cxex762e4mwrzl46.cloudworkstations.dev/storage/$imageUrl",
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+              ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(

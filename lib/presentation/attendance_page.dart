@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:absensi_gps/dio_service.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -258,7 +259,8 @@ class _AttendancePageState extends State<AttendancePage> {
                 child: const Text("Ambil Selfie"),
               ),
               const SizedBox(height: 24),
-              if (image != null) Image.file(image!),
+              if (image != null)
+                if (kIsWeb) Image.network(image!.path) else Image.file(image!),
               const SizedBox(height: 24),
               if (_latitude != null && _longitude != null)
                 Text(

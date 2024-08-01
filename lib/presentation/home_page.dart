@@ -1,6 +1,7 @@
 import 'package:absensi_gps/dio_service.dart';
 import 'package:absensi_gps/presentation/attendance_page.dart';
 import 'package:absensi_gps/presentation/widgets/attendance_item.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -53,13 +54,32 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class HomePage1 extends StatelessWidget {
+class HomePage1 extends StatefulWidget {
   final String scrollKey;
 
   const HomePage1({
     super.key,
     required this.scrollKey,
   });
+
+  @override
+  State<HomePage1> createState() => _HomePage1State();
+}
+
+class _HomePage1State extends State<HomePage1> {
+  Future<Response>? _future;
+
+  @override
+  void initState() {
+    super.initState();
+
+    loadAttendances();
+  }
+
+  Future<void> loadAttendances() async {
+    _future = Future.value(await dio.get('/attendances'));
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,13 +99,15 @@ class HomePage1 extends StatelessWidget {
                     icon: const Icon(Icons.notifications),
                   ),
                   IconButton.filled(
-                    onPressed: () {
-                      Navigator.push(
+                    onPressed: () async {
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => const AttendancePage(),
                         ),
                       );
+
+                      loadAttendances();
                     },
                     style: IconButton.styleFrom(
                       shape: RoundedRectangleBorder(
@@ -111,49 +133,47 @@ class HomePage1 extends StatelessWidget {
             ],
           ),
         ),
-        // Expanded(
-        //   child: ListView.builder(
-        //     key: PageStorageKey(scrollKey),
-        //     padding: const EdgeInsets.all(16),
-        //     itemCount: 100,
-        //     itemBuilder: (context, index) {
-        //       return Padding(
-        //         padding: const EdgeInsets.only(bottom: 10.0),
-        //         child: AttendenceItem(title: "Item $index"),
-        //       );
-        //     },
-        //   ),
-        // ),
         Expanded(
           child: Center(
             child: FutureBuilder(
-              future: dio.get('/attendances'),
+              future: _future,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   final response = snapshot.data?.data as Map<String, dynamic>;
                   final attendances = response['data'] as List<dynamic>;
 
-                  return ListView.builder(
-                    key: PageStorageKey(scrollKey),
-                    padding: const EdgeInsets.all(16),
-                    itemCount: attendances.length,
-                    itemBuilder: (context, index) {
-                      final attendance = attendances[index];
+                  return RefreshIndicator(
+                    onRefresh: loadAttendances,
+                    child: ListView.builder(
+                      key: PageStorageKey(widget.scrollKey),
+                      padding: const EdgeInsets.all(16),
+                      itemCount: attendances.length,
+                      itemBuilder: (context, index) {
+                        final attendance = attendances[index];
 
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0),
-                        child: AttendenceItem(
-                          title: attendance['work_description'],
-                          imageUrl: attendance['image'],
-                          description: attendance['work'],
-                          isLaptop: attendance['is_laptop'] == 1,
-                          isKomputer: attendance['is_komputer'] == 1,
-                          isHp: attendance['is_hp'] == 1,
-                          isLainya: attendance['is_lainya'] == 1,
-                          mood: attendance['mood'],
-                        ),
-                      );
-                    },
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10.0),
+                          child: Dismissible(
+                            key: Key(attendance['id'].toString()), // id unik untuk setiap attendance
+                            onDismissed: (direction) { // fungsi yang akan dijalankan ketika item dihapus
+                              final id = attendance['id']; // mendapatkan id dari attendance
+
+                              dio.delete('/attendances/$id'); // menghapus data dari server
+                            },
+                            child: AttendenceItem(
+                              title: attendance['work_description'],
+                              imageUrl: attendance['image'],
+                              description: attendance['work'],
+                              isLaptop: attendance['is_laptop'] == 1,
+                              isKomputer: attendance['is_komputer'] == 1,
+                              isHp: attendance['is_hp'] == 1,
+                              isLainya: attendance['is_lainya'] == 1,
+                              mood: attendance['mood'],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   );
                 }
                 if (snapshot.hasError) {

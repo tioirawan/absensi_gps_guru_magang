@@ -10,7 +10,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 
 class AttendancePage extends StatefulWidget {
-  const AttendancePage({super.key});
+  final Map<String, dynamic>? attendance;
+
+  const AttendancePage({super.key, this.attendance});
 
   @override
   State<AttendancePage> createState() => _AttendancePageState();
@@ -43,11 +45,45 @@ class _AttendancePageState extends State<AttendancePage> {
 
   bool _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+
+    // AkAN DIJALANKAN KETIKA WIDGET PERTAMA KALI TAMPIL/DIBUKA
+
+    if (widget.attendance != null) {
+      _deskripsiPekerjaanController.text =
+          widget.attendance!['work_description'];
+      _selectedPekerjaan = _pekerjaan.indexOf(widget.attendance!['work']);
+
+      if (_selectedPekerjaan == -1) {
+        _selectedPekerjaan = 0;
+      }
+
+      _isLaptop = widget.attendance!['is_laptop'] == 1;
+      _isKomputer = widget.attendance!['is_komputer'] == 1;
+      _isHP = widget.attendance!['is_hp'] == 1;
+      _isLainya = widget.attendance!['is_lainya'] == 1;
+      _suasanaHati = widget.attendance!['mood'];
+      _latitude = widget.attendance!['lat'];
+      _longitude = widget.attendance!['long'];
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await Future.delayed(const Duration(milliseconds: 500));
+        mapController.move(
+          LatLng(_latitude!, _longitude!),
+          16,
+        );
+      });
+    }
+  }
+
   bool _isFormValid() {
     final isDeskripsiPekerjaanValid =
         _deskripsiPekerjaanController.text.isNotEmpty;
     final isAlatKerjaSelected = _isLaptop || _isKomputer || _isHP || _isLainya;
-    final isImageSelected = image != null;
+    // final isImageSelected = image != null;
+    const isImageSelected = true;
     final isLocationSelected = _latitude != null && _longitude != null;
 
     return isDeskripsiPekerjaanValid &&
@@ -58,23 +94,37 @@ class _AttendancePageState extends State<AttendancePage> {
 
   void _submitForm() async {
     try {
-      final request = dio.post(
-        '/attendances',
-        data: FormData.fromMap(
-          {
-            'work_description': _deskripsiPekerjaanController.text,
-            'work': _pekerjaan[_selectedPekerjaan],
-            'is_laptop': _isLaptop ? 1 : 0,
-            'is_komputer': _isKomputer ? 1 : 0,
-            'is_hp': _isHP ? 1 : 0,
-            'is_lainya': _isLainya ? 1 : 0,
-            'mood': _suasanaHati,
-            'image': MultipartFile.fromFileSync(image!.path),
-            'lat': _latitude,
-            'long': _longitude,
-          },
-        ),
+      final data = FormData.fromMap(
+        {
+          'work_description': _deskripsiPekerjaanController.text,
+          'work': _pekerjaan[_selectedPekerjaan],
+          'is_laptop': _isLaptop ? 1 : 0,
+          'is_komputer': _isKomputer ? 1 : 0,
+          'is_hp': _isHP ? 1 : 0,
+          'is_lainya': _isLainya ? 1 : 0,
+          'mood': _suasanaHati,
+          if (image != null) 'image': MultipartFile.fromFileSync(image!.path),
+          'lat': _latitude,
+          'long': _longitude,
+        },
       );
+
+      final Future<Response> request;
+
+      if (widget.attendance != null) {
+        request = dio.post(
+          '/attendances/${widget.attendance!['id']}',
+          data: data,
+          queryParameters: {
+            '_method': 'PUT',
+          },
+        );
+      } else {
+        request = dio.post(
+          '/attendances',
+          data: data,
+        );
+      }
 
       final response = await request;
 
@@ -304,20 +354,20 @@ class _AttendancePageState extends State<AttendancePage> {
                 child: FlutterMap(
                   mapController: mapController,
                   children: [
-                    // TileLayer(
-                    //   urlTemplate:
-                    //       "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    //   subdomains: const ['a', 'b', 'c'],
-                    //   minNativeZoom: 2,
-                    //   maxNativeZoom: 18,
-                    // ),
                     TileLayer(
                       urlTemplate:
-                          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-                      subdomains: const ['server', 'services'],
+                          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                      subdomains: const ['a', 'b', 'c'],
                       minNativeZoom: 2,
                       maxNativeZoom: 18,
                     ),
+                    // TileLayer(
+                    //   urlTemplate:
+                    //       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                    //   subdomains: const ['server', 'services'],
+                    //   minNativeZoom: 2,
+                    //   maxNativeZoom: 18,
+                    // ),
                     MarkerLayer(markers: [
                       if (_latitude != null && _longitude != null)
                         Marker(

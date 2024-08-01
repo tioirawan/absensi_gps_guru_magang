@@ -2,6 +2,9 @@ import 'package:absensi_gps/dio_service.dart';
 import 'package:flutter/material.dart';
 
 class AttendenceItem extends StatelessWidget {
+  final Function()? onTap;
+  final Map<String, dynamic> attendance;
+
   final String title;
   final String? imageUrl;
   final String description;
@@ -14,6 +17,8 @@ class AttendenceItem extends StatelessWidget {
 
   const AttendenceItem({
     super.key,
+    this.onTap,
+    required this.attendance,
     required this.title,
     required this.imageUrl,
     required this.description,
@@ -130,8 +135,8 @@ class AttendenceItem extends StatelessWidget {
                 ),
                 const Spacer(),
                 IconButton.filled(
-                  onPressed: () {},
-                  icon: const Icon(Icons.chevron_right_rounded),
+                  onPressed: onTap,
+                  icon: const Icon(Icons.edit_rounded),
                   style: IconButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),

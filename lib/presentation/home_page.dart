@@ -154,13 +154,14 @@ class _HomePage1State extends State<HomePage1> {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 10.0),
                           child: Dismissible(
-                            key: Key(attendance['id'].toString()), // id unik untuk setiap attendance
-                            onDismissed: (direction) { // fungsi yang akan dijalankan ketika item dihapus
-                              final id = attendance['id']; // mendapatkan id dari attendance
+                            key: Key(attendance['id'].toString()),
+                            onDismissed: (direction) {
+                              final id = attendance['id'];
 
-                              dio.delete('/attendances/$id'); // menghapus data dari server
+                              dio.delete('/attendances/$id');
                             },
                             child: AttendenceItem(
+                              attendance: attendance,
                               title: attendance['work_description'],
                               imageUrl: attendance['image'],
                               description: attendance['work'],
@@ -169,6 +170,17 @@ class _HomePage1State extends State<HomePage1> {
                               isHp: attendance['is_hp'] == 1,
                               isLainya: attendance['is_lainya'] == 1,
                               mood: attendance['mood'],
+                              onTap: () async {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => AttendancePage(
+                                      attendance: attendance,
+                                    ),
+                                  ),
+                                );
+                                loadAttendances();
+                              },
                             ),
                           ),
                         );

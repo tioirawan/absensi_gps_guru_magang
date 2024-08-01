@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -109,15 +110,26 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: () {
+                onPressed: () async {
                   final isValid = _formKey.currentState?.validate() ?? false;
 
                   if (isValid) {
                     final username = _usernameController.text;
+                    final email = _emailController.text;
                     final password = _passwordController.text;
 
-                    print("username: $username");
-                    print("password: $password");
+                    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                      email: email,
+                      password: password,
+                    );
+
+                    // update display name
+                    await FirebaseAuth.instance.currentUser
+                        ?.updateDisplayName(username);
+
+                    await FirebaseAuth.instance.signOut();
+
+                    Navigator.pop(context);
                   }
                 },
                 style: FilledButton.styleFrom(

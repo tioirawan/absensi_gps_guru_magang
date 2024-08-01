@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "498224046655",
+    "project_id": "absensi-gps-7c907",
+    "storage_bucket": "absensi-gps-7c907.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:498224046655:android:b2e6fc6f9e361651bc8e8a",
+        "android_client_info": {
+          "package_name": "com.example.absensi_gps"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4pnvW8x935iCUZyBBlV6WU-kNmrJr9nU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

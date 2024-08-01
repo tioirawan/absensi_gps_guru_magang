@@ -1,7 +1,9 @@
 import 'package:absensi_gps/dio_service.dart';
 import 'package:absensi_gps/presentation/attendance_page.dart';
+import 'package:absensi_gps/presentation/login_page.dart';
 import 'package:absensi_gps/presentation/widgets/attendance_item.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -95,8 +97,17 @@ class _HomePage1State extends State<HomePage1> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.notifications),
+                    onPressed: () {
+                      FirebaseAuth.instance.signOut();
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.exit_to_app),
                   ),
                   IconButton.filled(
                     onPressed: () async {
@@ -118,7 +129,7 @@ class _HomePage1State extends State<HomePage1> {
                 ],
               ),
               Text(
-                "Absensi",
+                "Absensi ${FirebaseAuth.instance.currentUser?.displayName}",
                 style: GoogleFonts.openSans(
                   color: const Color.fromARGB(255, 0, 24, 44),
                   fontSize: 30,

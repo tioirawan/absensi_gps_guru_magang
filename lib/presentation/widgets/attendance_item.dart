@@ -51,6 +51,14 @@ class AttendenceItem extends StatelessWidget {
           color: Colors.grey.shade200,
           width: 2,
         ),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.red.withOpacity(0.2),
+            blurRadius: 4,
+            spreadRadius: 2,
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(16),
       child: IntrinsicHeight(

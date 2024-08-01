@@ -1,4 +1,6 @@
+import 'package:absensi_gps/presentation/home_page.dart';
 import 'package:absensi_gps/presentation/register_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -11,10 +13,24 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _isPasswordVisible = false; // state
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (FirebaseAuth.instance.currentUser != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,22 +51,22 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 24),
               TextFormField(
-                controller: _usernameController,
+                controller: _emailController,
                 decoration: const InputDecoration(
-                  labelText: 'Username',
+                  labelText: 'Email',
                 ),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Username tidak boleh kosong";
+                    return "Email tidak boleh kosong";
                   }
 
                   if (value == "admin") {
-                    return "Username admin tidak boleh digunakan";
+                    return "Email admin tidak boleh digunakan";
                   }
 
-                  if (value.contains("@")) {
-                    return "Username tidak boleh mengandung '@'";
+                  if (!value.contains("@")) {
+                    return "Email harus mengandung '@'";
                   }
 
                   return null;
@@ -88,15 +104,22 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: () {
+                onPressed: () async {
                   final isValid = _formKey.currentState?.validate() ?? false;
 
                   if (isValid) {
-                    final username = _usernameController.text;
+                    final email = _emailController.text;
                     final password = _passwordController.text;
 
-                    print("username: $username");
-                    print("password: $password");
+                    await FirebaseAuth.instance.signInWithEmailAndPassword(
+                      email: email,
+                      password: password,
+                    );
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const HomePage()),
+                    );
                   }
                 },
                 style: FilledButton.styleFrom(

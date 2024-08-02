@@ -1,4 +1,3 @@
-import 'package:absensi_gps/dio_service.dart';
 import 'package:absensi_gps/presentation/attendance_page.dart';
 import 'package:absensi_gps/presentation/login_page.dart';
 import 'package:absensi_gps/presentation/widgets/attendance_item.dart';
@@ -144,17 +143,21 @@ class _HomePage1State extends State<HomePage1> {
                     padding: const EdgeInsets.all(16),
                     itemCount: response.length,
                     itemBuilder: (context, index) {
+                      final document = response[index];
                       final attendance =
-                          response[index].data() as Map<String, dynamic>;
+                          document.data() as Map<String, dynamic>;
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10.0),
                         child: Dismissible(
-                          key: Key(attendance['id'].toString()),
+                          key: Key(document.id),
                           onDismissed: (direction) {
-                            final id = attendance['id'];
+                            final id = document.id;
 
-                            dio.delete('/attendances/$id');
+                            FirebaseFirestore.instance
+                                .collection("attendances")
+                                .doc(id)
+                                .delete();
                           },
                           child: AttendenceItem(
                             attendance: attendance,

@@ -5,15 +5,15 @@ class AttendenceItem extends StatelessWidget {
   final Function()? onTap;
   final Map<String, dynamic> attendance;
 
-  final String title;
+  final String? title;
   final String? imageUrl;
-  final String description;
-  final String mood;
+  final String? description;
+  final String? mood;
 
-  final bool isLaptop;
-  final bool isKomputer;
-  final bool isHp;
-  final bool isLainya;
+  final bool? isLaptop;
+  final bool? isKomputer;
+  final bool? isHp;
+  final bool? isLainya;
 
   const AttendenceItem({
     super.key,
@@ -80,39 +80,39 @@ class AttendenceItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    description,
+                    description ?? '-',
                     style: const TextStyle(
                       color: Colors.grey,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    title,
+                    title ?? '-',
                     style: const TextStyle(
                         fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      if (isLaptop)
+                      if (isLaptop == true)
                         const Icon(
                           Icons.laptop_mac_rounded,
                           color: Colors.blue,
                           size: 16,
                         ),
-                      if (isKomputer)
+                      if (isKomputer == true)
                         const Icon(
                           Icons.window_sharp,
                           color: Colors.green,
                           size: 16,
                         ),
-                      if (isHp)
+                      if (isHp == true)
                         const Icon(
                           Icons.desktop_windows_rounded,
                           color: Colors.orange,
                           size: 16,
                         ),
-                      if (isLainya)
+                      if (isLainya == true)
                         const Icon(
                           Icons.laptop_chromebook_rounded,
                           color: Colors.purple,
@@ -128,14 +128,14 @@ class AttendenceItem extends StatelessWidget {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: getMoodColor(mood).withOpacity(0.2),
+                    color: getMoodColor(mood ?? '-').withOpacity(0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   padding: const EdgeInsets.all(8),
                   child: Text(
-                    mood,
+                    mood ?? '-',
                     style: TextStyle(
-                      color: getMoodColor(mood),
+                      color: getMoodColor(mood ?? '-'),
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),

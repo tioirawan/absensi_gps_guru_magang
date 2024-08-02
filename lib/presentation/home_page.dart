@@ -2,7 +2,7 @@ import 'package:absensi_gps/dio_service.dart';
 import 'package:absensi_gps/presentation/attendance_page.dart';
 import 'package:absensi_gps/presentation/login_page.dart';
 import 'package:absensi_gps/presentation/widgets/attendance_item.dart';
-import 'package:dio/dio.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -69,20 +69,6 @@ class HomePage1 extends StatefulWidget {
 }
 
 class _HomePage1State extends State<HomePage1> {
-  Future<Response>? _future;
-
-  @override
-  void initState() {
-    super.initState();
-
-    loadAttendances();
-  }
-
-  Future<void> loadAttendances() async {
-    _future = Future.value(await dio.get('/attendances'));
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -117,8 +103,6 @@ class _HomePage1State extends State<HomePage1> {
                           builder: (_) => const AttendancePage(),
                         ),
                       );
-
-                      loadAttendances();
                     },
                     style: IconButton.styleFrom(
                       shape: RoundedRectangleBorder(
@@ -146,57 +130,56 @@ class _HomePage1State extends State<HomePage1> {
         ),
         Expanded(
           child: Center(
-            child: FutureBuilder(
-              future: _future,
+            child: StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection("attendances")
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  final response = snapshot.data?.data as Map<String, dynamic>;
-                  final attendances = response['data'] as List<dynamic>;
+                  final response =
+                      snapshot.data?.docs as List<DocumentSnapshot>;
 
-                  return RefreshIndicator(
-                    onRefresh: loadAttendances,
-                    child: ListView.builder(
-                      key: PageStorageKey(widget.scrollKey),
-                      padding: const EdgeInsets.all(16),
-                      itemCount: attendances.length,
-                      itemBuilder: (context, index) {
-                        final attendance = attendances[index];
+                  return ListView.builder(
+                    key: PageStorageKey(widget.scrollKey),
+                    padding: const EdgeInsets.all(16),
+                    itemCount: response.length,
+                    itemBuilder: (context, index) {
+                      final attendance =
+                          response[index].data() as Map<String, dynamic>;
 
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 10.0),
-                          child: Dismissible(
-                            key: Key(attendance['id'].toString()),
-                            onDismissed: (direction) {
-                              final id = attendance['id'];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10.0),
+                        child: Dismissible(
+                          key: Key(attendance['id'].toString()),
+                          onDismissed: (direction) {
+                            final id = attendance['id'];
 
-                              dio.delete('/attendances/$id');
-                            },
-                            child: AttendenceItem(
-                              attendance: attendance,
-                              title: attendance['work_description'],
-                              imageUrl: attendance['image'],
-                              description: attendance['work'],
-                              isLaptop: attendance['is_laptop'] == 1,
-                              isKomputer: attendance['is_komputer'] == 1,
-                              isHp: attendance['is_hp'] == 1,
-                              isLainya: attendance['is_lainya'] == 1,
-                              mood: attendance['mood'],
-                              onTap: () async {
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => AttendancePage(
-                                      attendance: attendance,
-                                    ),
+                            dio.delete('/attendances/$id');
+                          },
+                          child: AttendenceItem(
+                            attendance: attendance,
+                            title: attendance['work_description'],
+                            imageUrl: attendance['image'],
+                            description: attendance['work'],
+                            isLaptop: attendance['is_laptop'] == 1,
+                            isKomputer: attendance['is_komputer'] == 1,
+                            isHp: attendance['is_hp'] == 1,
+                            isLainya: attendance['is_lainya'] == 1,
+                            mood: attendance['mood'],
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => AttendancePage(
+                                    attendance: attendance,
                                   ),
-                                );
-                                loadAttendances();
-                              },
-                            ),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   );
                 }
                 if (snapshot.hasError) {

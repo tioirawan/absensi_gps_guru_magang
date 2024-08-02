@@ -175,6 +175,7 @@ class _HomePage1State extends State<HomePage1> {
                                 MaterialPageRoute(
                                   builder: (_) => AttendancePage(
                                     attendance: attendance,
+                                    id: document.id,
                                   ),
                                 ),
                               );

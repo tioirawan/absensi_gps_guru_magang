@@ -1,7 +1,6 @@
 import 'dart:io';
 
-import 'package:absensi_gps/dio_service.dart';
-import 'package:dio/dio.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -11,8 +10,13 @@ import 'package:latlong2/latlong.dart';
 
 class AttendancePage extends StatefulWidget {
   final Map<String, dynamic>? attendance;
+  final String? id;
 
-  const AttendancePage({super.key, this.attendance});
+  const AttendancePage({
+    super.key,
+    this.attendance,
+    this.id,
+  });
 
   @override
   State<AttendancePage> createState() => _AttendancePageState();
@@ -49,24 +53,22 @@ class _AttendancePageState extends State<AttendancePage> {
   void initState() {
     super.initState();
 
-    // AkAN DIJALANKAN KETIKA WIDGET PERTAMA KALI TAMPIL/DIBUKA
-
-    if (widget.attendance != null) {
+    if (widget.id != null) {
       _deskripsiPekerjaanController.text =
-          widget.attendance!['work_description'];
-      _selectedPekerjaan = _pekerjaan.indexOf(widget.attendance!['work']);
+          widget.attendance!['work_description'] ?? '';
+      _selectedPekerjaan = _pekerjaan.indexOf(widget.attendance!['work'] ?? '');
 
       if (_selectedPekerjaan == -1) {
         _selectedPekerjaan = 0;
       }
 
-      _isLaptop = widget.attendance!['is_laptop'] == 1;
-      _isKomputer = widget.attendance!['is_komputer'] == 1;
-      _isHP = widget.attendance!['is_hp'] == 1;
-      _isLainya = widget.attendance!['is_lainya'] == 1;
-      _suasanaHati = widget.attendance!['mood'];
-      _latitude = widget.attendance!['lat'];
-      _longitude = widget.attendance!['long'];
+      _isLaptop = widget.attendance!['is_laptop'] ?? false;
+      _isKomputer = widget.attendance!['is_komputer'] ?? false;
+      _isHP = widget.attendance!['is_hp'] ?? false;
+      _isLainya = widget.attendance!['is_lainya'] ?? false;
+      _suasanaHati = widget.attendance!['mood'] ?? '';
+      _latitude = widget.attendance!['lat'] ?? 0;
+      _longitude = widget.attendance!['long'] ?? 0;
 
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await Future.delayed(const Duration(milliseconds: 500));
@@ -94,41 +96,26 @@ class _AttendancePageState extends State<AttendancePage> {
 
   void _submitForm() async {
     try {
-      final data = FormData.fromMap(
-        {
-          'work_description': _deskripsiPekerjaanController.text,
-          'work': _pekerjaan[_selectedPekerjaan],
-          'is_laptop': _isLaptop ? 1 : 0,
-          'is_komputer': _isKomputer ? 1 : 0,
-          'is_hp': _isHP ? 1 : 0,
-          'is_lainya': _isLainya ? 1 : 0,
-          'mood': _suasanaHati,
-          if (image != null) 'image': MultipartFile.fromFileSync(image!.path),
-          'lat': _latitude,
-          'long': _longitude,
-        },
-      );
+      final data = {
+        'work_description': _deskripsiPekerjaanController.text,
+        'work': _pekerjaan[_selectedPekerjaan],
+        'is_laptop': _isLaptop,
+        'is_komputer': _isKomputer,
+        'is_hp': _isHP,
+        'is_lainya': _isLainya,
+        'mood': _suasanaHati,
+        'lat': _latitude,
+        'long': _longitude,
+      };
 
-      final Future<Response> request;
-
-      if (widget.attendance != null) {
-        request = dio.post(
-          '/attendances/${widget.attendance!['id']}',
-          data: data,
-          queryParameters: {
-            '_method': 'PUT',
-          },
-        );
+      if (widget.id != null) {
+        await FirebaseFirestore.instance
+            .collection('attendances')
+            .doc(widget.id!)
+            .update(data);
       } else {
-        request = dio.post(
-          '/attendances',
-          data: data,
-        );
+        await FirebaseFirestore.instance.collection('attendances').add(data);
       }
-
-      final response = await request;
-
-      print(response.data);
 
       Navigator.of(context).pop();
     } on Exception catch (e) {
